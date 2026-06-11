@@ -44,13 +44,10 @@ export default function About() {
                 <p className="text-txt-primary mb-2">)</p>
                 <br />
                 <p className="text-txt-primary">bks.deploy_to_production()</p>
-                <motion.p 
-                  animate={{ opacity: [0, 1, 0] }}
-                  transition={{ repeat: Infinity, duration: 1 }}
-                  className="text-success mt-4"
-                >
-                  Running successfully... █
-                </motion.p>
+                <p className="text-success mt-4 flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-success animate-pulse" />
+                  Running successfully...
+                </p>
               </motion.div>
             </div>
           </div>

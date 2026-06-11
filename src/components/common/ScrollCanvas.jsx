@@ -9,193 +9,201 @@ export default function ScrollCanvas() {
     let animId
     let scrollY = 0
     let targetScrollY = 0
+    let lastScrollY = 0
+    let scrollVelocity = 0
 
-    // --- Particles ---
-    const NUM_PARTICLES = 120
-    const particles = []
+    // --- Stars ---
+    const STAR_COUNT = 180
+    const stars = []
 
-    // --- Shooting stars ---
-    const shootingStars = []
-    let nextShoot = 0
+    // --- Meteors triggered by scroll ---
+    const meteors = []
+    let lastMeteorScroll = 0
 
     // --- Aurora orbs ---
     const orbs = [
-      { x: 0.15, y: 0.2,  r: 0.35, color: '59,130,246',  speed: 0.00012 },
-      { x: 0.80, y: 0.7,  r: 0.30, color: '6,182,212',   speed: 0.00009 },
-      { x: 0.5,  y: 1.1,  r: 0.28, color: '139,92,246',  speed: 0.00015 },
-      { x: 0.85, y: 0.15, r: 0.22, color: '99,102,241',  speed: 0.00010 },
+      { bx: 0.12, by: 0.25, r: 0.40, color: '59,130,246',  t: 0 },
+      { bx: 0.82, by: 0.65, r: 0.35, color: '6,182,212',   t: 2 },
+      { bx: 0.50, by: 1.20, r: 0.30, color: '139,92,246',  t: 4 },
+      { bx: 0.88, by: 0.12, r: 0.25, color: '99,102,241',  t: 1 },
     ]
 
     function resize() {
-      canvas.width = window.innerWidth
+      canvas.width  = window.innerWidth
       canvas.height = window.innerHeight
+      stars.length  = 0
 
-      particles.length = 0
-      for (let i = 0; i < NUM_PARTICLES; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.25,
-          vy: (Math.random() - 0.5) * 0.25,
-          r: Math.random() * 1.5 + 0.4,
-          depth: Math.random() * 0.8 + 0.2,   // parallax depth (0.2 = far, 1 = close)
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x:     Math.random() * canvas.width,
+          y:     Math.random() * canvas.height,
           baseY: 0,
+          vx:    (Math.random() - 0.5) * 0.15,
+          vy:    (Math.random() - 0.5) * 0.15,
+          r:     Math.random() * 1.4 + 0.3,
+          depth: Math.random() * 0.7 + 0.15,
+          alpha: Math.random() * 0.5 + 0.3,
         })
-        particles[particles.length - 1].baseY = particles[particles.length - 1].y
+        stars[stars.length - 1].baseY = stars[stars.length - 1].y
       }
     }
 
-    function spawnShootingStar() {
-      const startX = Math.random() * canvas.width * 1.5 - canvas.width * 0.25
-      shootingStars.push({
-        x: startX,
-        y: -10,
-        vx: Math.random() * 3 + 2,
-        vy: Math.random() * 3 + 2,
-        len: Math.random() * 120 + 60,
+    function spawnMeteor(fast) {
+      // meteors fall top-right → bottom-left
+      const side = Math.random() > 0.5
+      const sx = side ? Math.random() * canvas.width * 0.7 : Math.random() * canvas.width
+      const sy = side ? 0 : Math.random() * -200
+      const speed = fast ? (Math.random() * 10 + 8) : (Math.random() * 5 + 3)
+      meteors.push({
+        x: sx, y: sy,
+        vx: speed * -0.5,
+        vy: speed,
+        len: Math.random() * 180 + 80,
         alpha: 1,
-        decay: Math.random() * 0.012 + 0.008,
+        decay: Math.random() * 0.008 + 0.004,
+        width: Math.random() * 1.5 + 0.5,
       })
     }
 
     function drawOrbs(t) {
-      orbs.forEach((orb) => {
-        const pulse = Math.sin(t * orb.speed * 1000) * 0.06
-        const cx = orb.x * canvas.width
-        // aurora orbs shift slowly with scroll (deep parallax)
-        const cy = orb.y * canvas.height - scrollY * 0.12 + Math.sin(t * orb.speed * 600) * 40
-        const radius = (orb.r * Math.min(canvas.width, canvas.height)) * (1 + pulse)
+      orbs.forEach(orb => {
+        const cx = orb.bx * canvas.width  + Math.sin(t * 0.0003 + orb.t) * 60
+        const cy = orb.by * canvas.height + Math.cos(t * 0.0002 + orb.t) * 40 - scrollY * 0.10
+        const radius = orb.r * Math.min(canvas.width, canvas.height)
 
-        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius)
-        grad.addColorStop(0, `rgba(${orb.color}, 0.18)`)
-        grad.addColorStop(0.5, `rgba(${orb.color}, 0.06)`)
-        grad.addColorStop(1, `rgba(${orb.color}, 0)`)
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius)
+        g.addColorStop(0,   `rgba(${orb.color},0.16)`)
+        g.addColorStop(0.5, `rgba(${orb.color},0.05)`)
+        g.addColorStop(1,   `rgba(${orb.color},0)`)
 
         ctx.beginPath()
         ctx.arc(cx, cy, radius, 0, Math.PI * 2)
-        ctx.fillStyle = grad
+        ctx.fillStyle = g
         ctx.fill()
       })
     }
 
-    function drawParticles() {
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i]
+    function drawGrid() {
+      const gs = 90
+      const offsetY = (scrollY * 0.06) % gs
+      ctx.strokeStyle = 'rgba(59,130,246,0.035)'
+      ctx.lineWidth = 0.5
+      for (let x = 0; x <= canvas.width; x += gs) {
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); ctx.stroke()
+      }
+      for (let y = -gs + offsetY; y <= canvas.height + gs; y += gs) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke()
+      }
+    }
 
-        // Scroll parallax: closer particles move more
-        const parallaxOffset = scrollY * p.depth * 0.15
-        const drawY = (p.y - parallaxOffset % canvas.height + canvas.height) % canvas.height
+    function drawStars() {
+      for (let i = 0; i < stars.length; i++) {
+        const s = stars[i]
+        // gentle drift
+        s.x += s.vx; s.y += s.vy
+        if (s.x < 0) s.x = canvas.width
+        if (s.x > canvas.width) s.x = 0
+        if (s.y < 0) s.y = canvas.height
+        if (s.y > canvas.height) s.y = 0
 
-        p.x += p.vx
-        p.y += p.vy
-        if (p.x < 0) p.x = canvas.width
-        if (p.x > canvas.width) p.x = 0
-        if (p.y < 0) p.y = canvas.height
-        if (p.y > canvas.height) p.y = 0
+        // parallax: near stars (high depth) move more with scroll
+        const py = (s.y - scrollY * s.depth * 0.12 % canvas.height + canvas.height * 10) % canvas.height
 
-        const alpha = 0.3 + p.depth * 0.5
         ctx.beginPath()
-        ctx.arc(p.x, drawY, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(148, 163, 184, ${alpha})`
+        ctx.arc(s.x, py, s.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(200,215,255,${s.alpha})`
         ctx.fill()
 
-        // Connect nearby particles
-        for (let j = i + 1; j < particles.length; j++) {
-          const q = particles[j]
-          const qDrawY = (q.y - scrollY * q.depth * 0.15 % canvas.height + canvas.height) % canvas.height
-          const dist = Math.hypot(p.x - q.x, drawY - qDrawY)
-          if (dist < 100) {
+        // connect close neighbours
+        for (let j = i + 1; j < stars.length; j++) {
+          const t = stars[j]
+          const ty = (t.y - scrollY * t.depth * 0.12 % canvas.height + canvas.height * 10) % canvas.height
+          const d = Math.hypot(s.x - t.x, py - ty)
+          if (d < 110) {
             ctx.beginPath()
-            ctx.moveTo(p.x, drawY)
-            ctx.lineTo(q.x, qDrawY)
-            ctx.strokeStyle = `rgba(99,130,246,${0.12 * (1 - dist / 100)})`
-            ctx.lineWidth = 0.5
+            ctx.moveTo(s.x, py); ctx.lineTo(t.x, ty)
+            ctx.strokeStyle = `rgba(99,130,246,${0.10 * (1 - d/110)})`
+            ctx.lineWidth = 0.4
             ctx.stroke()
           }
         }
       }
     }
 
-    function drawShootingStars(t) {
-      if (t > nextShoot) {
-        spawnShootingStar()
-        nextShoot = t + Math.random() * 4000 + 2000
-      }
+    function drawMeteors() {
+      for (let i = meteors.length - 1; i >= 0; i--) {
+        const m = meteors[i]
+        m.x += m.vx; m.y += m.vy
+        m.alpha -= m.decay
 
-      for (let i = shootingStars.length - 1; i >= 0; i--) {
-        const s = shootingStars[i]
-        s.x += s.vx
-        s.y += s.vy
-        s.alpha -= s.decay
-
-        if (s.alpha <= 0 || s.x > canvas.width + 200 || s.y > canvas.height + 200) {
-          shootingStars.splice(i, 1)
-          continue
+        if (m.alpha <= 0 || m.y > canvas.height + 100 || m.x < -200) {
+          meteors.splice(i, 1); continue
         }
 
-        const tailX = s.x - s.vx * s.len / Math.hypot(s.vx, s.vy)
-        const tailY = s.y - s.vy * s.len / Math.hypot(s.vx, s.vy)
+        const speed = Math.hypot(m.vx, m.vy)
+        const tailX = m.x - (m.vx / speed) * m.len
+        const tailY = m.y - (m.vy / speed) * m.len
 
-        const grad = ctx.createLinearGradient(tailX, tailY, s.x, s.y)
-        grad.addColorStop(0, `rgba(255,255,255,0)`)
-        grad.addColorStop(1, `rgba(255,255,255,${s.alpha})`)
+        const g = ctx.createLinearGradient(tailX, tailY, m.x, m.y)
+        g.addColorStop(0, `rgba(255,255,255,0)`)
+        g.addColorStop(0.7, `rgba(180,210,255,${m.alpha * 0.5})`)
+        g.addColorStop(1, `rgba(255,255,255,${m.alpha})`)
 
         ctx.beginPath()
-        ctx.moveTo(tailX, tailY)
-        ctx.lineTo(s.x, s.y)
-        ctx.strokeStyle = grad
-        ctx.lineWidth = 1.5
+        ctx.moveTo(tailX, tailY); ctx.lineTo(m.x, m.y)
+        ctx.strokeStyle = g
+        ctx.lineWidth = m.width
         ctx.stroke()
 
-        // Tip glow
+        // bright tip
+        const tipGlow = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, 6)
+        tipGlow.addColorStop(0, `rgba(220,240,255,${m.alpha})`)
+        tipGlow.addColorStop(1, `rgba(220,240,255,0)`)
         ctx.beginPath()
-        ctx.arc(s.x, s.y, 2, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(200, 220, 255, ${s.alpha})`
+        ctx.arc(m.x, m.y, 6, 0, Math.PI * 2)
+        ctx.fillStyle = tipGlow
         ctx.fill()
-      }
-    }
-
-    function drawGrid() {
-      const gridSize = 80
-      const offsetY = (scrollY * 0.08) % gridSize
-
-      ctx.strokeStyle = 'rgba(59,130,246,0.04)'
-      ctx.lineWidth = 0.5
-
-      for (let x = 0; x < canvas.width; x += gridSize) {
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, canvas.height)
-        ctx.stroke()
-      }
-      for (let y = -gridSize + offsetY; y < canvas.height + gridSize; y += gridSize) {
-        ctx.beginPath()
-        ctx.moveTo(0, y)
-        ctx.lineTo(canvas.width, y)
-        ctx.stroke()
       }
     }
 
     let lastT = 0
     function tick(t) {
-      // Smooth scroll lerp
-      scrollY += (targetScrollY - scrollY) * 0.08
       const dt = t - lastT
       lastT = t
+
+      // smooth lerp scroll
+      scrollY += (targetScrollY - scrollY) * 0.07
+      scrollVelocity = targetScrollY - lastScrollY
+      lastScrollY = targetScrollY
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       drawGrid()
       drawOrbs(t)
-      drawParticles()
-      drawShootingStars(t)
+      drawStars()
+      drawMeteors()
 
       animId = requestAnimationFrame(tick)
     }
 
+    let scrollTimeout
     const onScroll = () => {
-      targetScrollY = window.scrollY
+      const newY = window.scrollY
+      const delta = Math.abs(newY - targetScrollY)
+      targetScrollY = newY
+
+      // spawn meteors on fast scroll
+      if (delta > 30 && Math.abs(newY - lastMeteorScroll) > 60) {
+        const count = Math.min(4, Math.floor(delta / 40))
+        for (let i = 0; i < count; i++) {
+          setTimeout(() => spawnMeteor(delta > 80), i * 120)
+        }
+        lastMeteorScroll = newY
+      }
     }
+
+    // ambient meteors every ~5s when idle
+    const ambientInterval = setInterval(() => spawnMeteor(false), 5000)
 
     resize()
     window.addEventListener('resize', resize)
@@ -204,6 +212,7 @@ export default function ScrollCanvas() {
 
     return () => {
       cancelAnimationFrame(animId)
+      clearInterval(ambientInterval)
       window.removeEventListener('resize', resize)
       window.removeEventListener('scroll', onScroll)
     }
