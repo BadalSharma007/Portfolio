@@ -11,10 +11,14 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import BackToTop from './components/BackToTop'
 import ScrollCanvas from './components/common/ScrollCanvas'
+import CursorGlow from './components/CursorGlow'
 
 export default function App() {
   return (
     <div className="bg-bg-primary text-txt-primary min-h-screen overflow-x-hidden relative">
+      {/* Cursor spotlight glow — desktop only */}
+      <CursorGlow />
+
       {/* Global scroll-synced animated background */}
       <ScrollCanvas />
 

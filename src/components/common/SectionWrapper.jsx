@@ -14,12 +14,16 @@ export default function SectionWrapper({ id, label, heading, subheading, childre
             className="mb-12 md:mb-16 text-center"
           >
             {label && (
-              <p className="text-accent-light uppercase tracking-widest text-sm font-semibold mb-3">
-                {label}
-              </p>
+              <div className="inline-flex items-center gap-2 mb-4">
+                <div className="w-6 h-px bg-accent-gradient rounded-full opacity-60" />
+                <p className="text-accent-light uppercase tracking-[0.22em] text-xs font-semibold">
+                  {label}
+                </p>
+                <div className="w-6 h-px bg-accent-gradient rounded-full opacity-60" />
+              </div>
             )}
             {heading && (
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 gradient-text">
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 gradient-text leading-tight">
                 {heading}
               </h2>
             )}
