@@ -1,6 +1,6 @@
 // Centralized content — edit your data here.
 import {
-  SiGithub, SiLinkedin, SiX, SiLeetcode, SiKaggle, SiCodeforces,
+  SiGithub, SiX, SiLeetcode, SiKaggle, SiCodeforces,
   SiPython, SiCplusplus, SiMysql, SiOpenjdk,
   SiPytorch, SiTensorflow, SiKeras, SiScikitlearn, SiOpencv, SiSpacy, SiHuggingface, SiOllama,
   SiPandas, SiNumpy, SiPlotly,
@@ -8,6 +8,7 @@ import {
   SiDocker, SiGit, SiGithubactions, SiGooglecloud, SiLinux,
   SiEspressif, SiNvidia, SiRaspberrypi,
 } from 'react-icons/si'
+import { FaLinkedinIn } from 'react-icons/fa'
 
 export const PROFILE = {
   name: 'Badal Kumar Sharma',
@@ -28,7 +29,7 @@ export const TYPING_PHRASES = [
 
 export const SOCIALS = [
   { name: 'GitHub', icon: SiGithub, url: 'https://github.com/BadalSharma007' },
-  { name: 'LinkedIn', icon: SiLinkedin, url: 'https://linkedin.com/in/badal-kr-sharma-471a19263' },
+  { name: 'LinkedIn', icon: FaLinkedinIn, url: 'https://linkedin.com/in/badal-kr-sharma-471a19263' },
   { name: 'Twitter/X', icon: SiX, url: 'https://x.com/Badal_kr_sharma' },
   { name: 'LeetCode', icon: SiLeetcode, url: 'https://leetcode.com/u/Badalkrsharma' },
   { name: 'Kaggle', icon: SiKaggle, url: 'https://kaggle.com/badalkrsharma' },
@@ -326,7 +327,7 @@ export const PROFILES = [
     username: 'badal-kr-sharma',
     link: 'https://linkedin.com/in/badal-kr-sharma-471a19263',
     stat: 'Professional Network',
-    icon: SiLinkedin,
+    icon: FaLinkedinIn,
     color: '#0A66C2',
   },
   {
