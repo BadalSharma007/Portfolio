@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://badalsharma007.github.io/",
+  "homepage": "https://badalsharma.me",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
