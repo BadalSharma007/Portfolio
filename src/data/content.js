@@ -1,7 +1,7 @@
 // Centralized content — edit your data here.
 import {
-  SiGithub, SiX, SiLeetcode, SiKaggle, SiCodeforces,
-  SiPython, SiCplusplus, SiJavascript, SiMysql, SiOpenjdk,
+  SiGithub, SiLinkedin, SiX, SiLeetcode, SiKaggle, SiCodeforces,
+  SiPython, SiCplusplus, SiMysql, SiOpenjdk,
   SiPytorch, SiTensorflow, SiKeras, SiScikitlearn, SiOpencv, SiSpacy, SiHuggingface, SiOllama,
   SiPandas, SiNumpy, SiPlotly,
   SiFastapi, SiFlask, SiNodedotjs, SiPostgresql, SiRedis, SiMongodb,
@@ -28,7 +28,7 @@ export const TYPING_PHRASES = [
 
 export const SOCIALS = [
   { name: 'GitHub', icon: SiGithub, url: 'https://github.com/BadalSharma007' },
-  { name: 'LinkedIn', icon: SiGithub, url: 'https://linkedin.com/in/badal-kr-sharma-471a19263' },
+  { name: 'LinkedIn', icon: SiLinkedin, url: 'https://linkedin.com/in/badal-kr-sharma-471a19263' },
   { name: 'Twitter/X', icon: SiX, url: 'https://x.com/Badal_kr_sharma' },
   { name: 'LeetCode', icon: SiLeetcode, url: 'https://leetcode.com/u/Badalkrsharma' },
   { name: 'Kaggle', icon: SiKaggle, url: 'https://kaggle.com/badalkrsharma' },
@@ -254,7 +254,6 @@ export const TECH_STACK = [
     items: [
       { name: 'Python', level: 'Advanced', icon: SiPython, color: '#3776AB' },
       { name: 'C++', level: 'Intermediate', icon: SiCplusplus, color: '#00599C' },
-      { name: 'JavaScript', level: 'Intermediate', icon: SiJavascript, color: '#F7DF1E' },
       { name: 'SQL', level: 'Intermediate', icon: SiMysql, color: '#4479A1' },
       { name: 'Java', level: 'Intermediate', icon: SiOpenjdk, color: '#ED8B00' },
     ],
@@ -327,7 +326,7 @@ export const PROFILES = [
     username: 'badal-kr-sharma',
     link: 'https://linkedin.com/in/badal-kr-sharma-471a19263',
     stat: 'Professional Network',
-    icon: SiGithub,
+    icon: SiLinkedin,
     color: '#0A66C2',
   },
   {
